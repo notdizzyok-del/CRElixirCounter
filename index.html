@@ -1,0 +1,893 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Clash Royale Elixir Practice</title>
+<style>
+/* ---------- Styles (complete) ---------- */
+:root{
+  --bg:#f4f6f8; --text:#0f1720; --card:#fff; --muted:#6b7280; --accent:#0b84ff;
+  --success:#16a34a; --danger:#ef4444; --glass:rgba(255,255,255,0.6);
+}
+.dark{
+  --bg:#0b0d10; --text:#e6eef6; --card:#111214; --muted:#94a3b8; --accent:#2ea1ff;
+  --glass: rgba(255,255,255,0.02);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1100px;margin:10px auto;padding:12px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:center}
+h1{margin:0;font-size:18px}
+.sub{font-size:12px;color:var(--muted)}
+.controls-row{display:flex;gap:8px;align-items:center}
+.btn{background:var(--accent);color:white;border:none;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:700}
+.small{padding:6px 8px;font-size:14px}
+.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);color:var(--text);border-radius:8px;padding:6px 8px;cursor:pointer}
+nav{display:flex;gap:8px;margin-top:12px;justify-content:center}
+.tab{background:var(--card);border:1px solid rgba(0,0,0,0.06);padding:8px 12px;border-radius:10px;cursor:pointer;color:var(--text);font-weight:700}
+.tab.active{background:var(--accent);color:white;box-shadow:0 6px 18px rgba(11,132,255,0.12)}
+main{margin-top:14px;display:grid;grid-template-columns:1fr 360px;gap:14px;min-height:60vh}
+@media (max-width:980px){ main{grid-template-columns:1fr} }
+.panel{background:var(--card);padding:14px;border-radius:12px;border:1px solid rgba(0,0,0,0.06);box-shadow:0 8px 24px rgba(2,6,23,0.04)}
+.quiz-top{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center}
+.card-preview{width:140px;height:140px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:var(--glass);overflow:hidden;border:1px solid rgba(0,0,0,0.06);position:relative;transition:transform .2s}
+.card-preview img{max-width:120px;max-height:120px;object-fit:contain}
+.meta{min-width:220px;display:flex;flex-direction:column;gap:8px}
+.input-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input[type=number], input[type=text], select{padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);min-width:120px}
+.feedback{min-height:22px;font-weight:700;margin-top:8px;color:var(--muted)}
+.hint{text-align:center;margin-top:8px;font-style:italic;color:var(--muted)}
+.score-row{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:12px;flex-wrap:wrap}
+.score-bubble{background:rgba(11,132,255,0.1);color:var(--accent);padding:8px 10px;border-radius:999px;font-weight:800}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:12px}
+.lib-card{background:var(--glass);border-radius:10px;padding:8px;text-align:center;border:1px solid rgba(0,0,0,0.06);cursor:pointer;transition:transform .12s}
+.lib-card:hover{transform:translateY(-6px)}
+.lib-card img{width:72px;height:72px;object-fit:contain}
+.lib-name{font-size:13px;margin-top:6px;font-weight:700}
+.elixir-row{display:flex;gap:6px;align-items:center;justify-content:center;margin-top:4px}
+.elixir-row img{width:20px;height:20px}
+.correct { box-shadow: 0 0 0 6px rgba(22,163,74,0.12); transform: translateY(-4px); border-color: rgba(22,163,74,0.25) !important; }
+.wrong { animation: shake .35s; box-shadow: 0 0 0 6px rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.25) !important; }
+@keyframes shake { 0%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}100%{transform:translateX(0)} }
+.timer{font-weight:900;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,0.06)}
+.stats{display:flex;flex-direction:column;gap:6px}
+.stat-line{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,0.03)}
+.control-block{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.hand{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.hand .card-mini{width:80px;height:80px;background:var(--glass);display:flex;align-items:center;justify-content:center;border-radius:8px;padding:6px;border:1px solid rgba(0,0,0,0.06)}
+.card-mini img{max-width:70px;max-height:70px}
+.muted{font-size:12px;color:var(--muted)}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:999}
+.modal{background:var(--card);padding:12px;border-radius:10px;max-width:920px;width:96%;max-height:86vh;overflow:auto;border:1px solid rgba(0,0,0,0.08)}
+.pool-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:8px}
+.pool-card{display:flex;align-items:center;gap:8px;padding:6px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);background:var(--glass)}
+.search{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);margin-bottom:8px}
+.selector-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+@media (max-width:520px){
+  .card-preview{width:110px;height:110px}
+  .meta{min-width:unset;width:100%}
+  header{flex-direction:column;align-items:flex-start}
+  nav{justify-content:space-between}
+  main{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header>
+    <div>
+      <h1>Clash Royale Elixir Practice</h1>
+      <!-- sub header removed per request -->
+    </div>
+
+    <div class="controls-row">
+      <button id="themeToggle" class="ghost small">🌙 Theme</button>
+      <button id="resetHigh" class="ghost small">Reset High</button>
+    </div>
+  </header>
+
+  <nav>
+    <button id="tabQuiz" class="tab active">Quiz</button>
+    <button id="tabElixir" class="tab">Elixir Meter</button>
+    <button id="tabLibrary" class="tab">Quiz Pool</button>
+  </nav>
+
+  <main>
+    <!-- Left column: interactive panels -->
+    <section>
+      <!-- QUIZ PANEL -->
+      <div id="quizPanel" class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <label class="muted">Difficulty:</label>
+            <select id="difficulty">
+              <option value="easy">Easy (multiple choice)</option>
+              <option value="medium" selected>Medium (type elixir)</option>
+              <option value="hard">Hard (image only)</option>
+            </select>
+
+            <label class="muted">Filter:</label>
+            <label><input type="checkbox" class="filter" value="Troop" checked> Troops</label>
+            <label><input type="checkbox" class="filter" value="Building" checked> Buildings</label>
+            <label><input type="checkbox" class="filter" value="Spell" checked> Spells</label>
+          </div>
+
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="muted">Timed:</div>
+            <input id="timedToggle" type="checkbox">
+            <div class="muted">Length:</div>
+            <select id="timedLength">
+              <option value="30">30s</option><option value="60" selected>60s</option><option value="120">120s</option>
+            </select>
+            <div id="timer" class="timer" style="display:none">60</div>
+          </div>
+        </div>
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(0,0,0,0.06)">
+
+        <div class="quiz-top">
+          <div class="card-preview" id="cardPreview"><img id="cardImage" src="" alt="card"></div>
+
+          <div class="meta">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-weight:900" id="displayName">—</div>
+              <div id="displayElixir" style="display:flex;align-items:center;gap:8px">
+                <!-- initially just a question mark; reveal only after final answer -->
+              </div>
+            </div>
+
+            <div id="easyChoices" style="display:none;gap:8px;justify-content:center"></div>
+
+            <div class="input-row" id="inputRow">
+              <input id="guessInput" type="number" min="1" max="9" placeholder="Elixir (1-9)">
+              <button id="submitBtn" class="btn small">Submit</button>
+              <button id="hintBtn" class="ghost small">Hint</button>
+            </div>
+
+            <div class="feedback" id="feedback">Good luck!</div>
+            <div class="hint" id="hintText"></div>
+            <div class="muted" id="triesText"></div>
+          </div>
+        </div>
+
+        <div class="score-row">
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="score-bubble" id="scoreBubble">Score: 0</div>
+            <div class="muted">Attempts: <span id="totalAttempts">0</span></div>
+            <div class="muted">Streak: <span id="streak">0</span></div>
+          </div>
+
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="muted">High: <strong id="highScore">0</strong></div>
+            <div class="muted">Recent: <span id="recentNames">—</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ELIXIR METER -->
+      <div id="elixirPanel" class="panel" style="margin-top:14px;display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:900">Elixir Meter Practice</div>
+          <div class="muted">Choose 4-card hands and guess total</div>
+        </div>
+
+        <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <button id="generateHand" class="btn small">New Hand</button>
+          <button id="submitHand" class="btn small">Submit</button>
+          <input id="handInput" type="number" placeholder="Total elixir">
+          <button id="revealHand" class="ghost small">Show Answer</button>
+        </div>
+
+        <div class="hand" id="handArea" style="margin-top:12px"></div>
+        <div class="muted" id="handFeedback" style="margin-top:8px"></div>
+
+      </div>
+
+      <div id="libraryPanelSmall" style="display:none"></div>
+
+    </section>
+
+    <!-- Right column: stats and library -->
+    <aside>
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:900">Player Stats</div>
+          <!-- <div class="muted">persisted locally</div> -->
+        </div>
+        <div class="stats" style="margin-top:8px">
+          <div class="stat-line"><div>Accuracy</div><div id="statAccuracy">0%</div></div>
+          <div class="stat-line"><div>Avg guess error</div><div id="statAvgError">0</div></div>
+          <div class="stat-line"><div>Longest streak</div><div id="statMaxStreak">0</div></div>
+          <div class="stat-line"><div>Games played</div><div id="statGames">0</div></div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:900">Library</div>
+       <!--   <div class="muted">Browse cards</div> -->
+        </div>
+
+        <!-- library search -->
+        <input id="librarySearch" class="search" type="text" placeholder="Search library">
+
+        <div id="libraryGrid" style="margin-top:10px;max-height:520px;overflow:auto"></div>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<!-- Quiz Pool Modal (opened by top nav "Quiz Pool") -->
+<div id="poolModalBackdrop" style="display:none" class="modal-backdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Quiz pool selector">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <h3 style="margin:0">Quiz Pool — select which cards appear in quizzes</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="selectAllPool" class="ghost small">Select All</button>
+        <button id="clearAllPool" class="ghost small">Clear All</button>
+        <button id="closePool" class="btn small">Apply</button>
+      </div>
+    </div>
+
+    <input id="poolSearch" class="search" placeholder="Search pool (name)">
+
+    <div class="selector-controls">
+      <label class="muted" style="margin-right:8px">Also respect category filters</label>
+      <label><input id="poolRespectFilters" type="checkbox" checked> Yes</label>
+    </div>
+
+    <div id="poolGrid" class="pool-grid"></div>
+  </div>
+</div>
+
+<script>
+/* ------------------------------
+  Data & resources
+--------------------------------*/
+/* The full rawCards list — from your original list */
+const rawCards = [
+["Skeletons",1,"Troop"],["Ice Spirit",1,"Troop"],["Fire Spirit",1,"Troop"],["Electro Spirit",1,"Troop"],["Heal Spirit",1,"Troop"],
+["Goblins",2,"Troop"],["Bomber",2,"Troop"],["Spear Goblins",2,"Troop"],["Ice Golem",2,"Troop"],["Bats",2,"Troop"],
+["Wall Breakers",2,"Troop"],["Suspicious Bush",2,"Troop"],["Berserker",2,"Troop"],
+["Knight",3,"Troop"],["Archers",3,"Troop"],["Minions",3,"Troop"],["Skeleton Army",3,"Troop"],["Ice Wizard",3,"Troop"],["Guards",3,"Troop"],
+["Princess",3,"Troop"],["Miner",3,"Troop"],["Mega Minion",3,"Troop"],["Dart Goblin",3,"Troop"],["Goblin Gang",3,"Troop"],["Bandit",3,"Troop"],
+["Royal Ghost",3,"Troop"],["Skeleton Barrel",3,"Troop"],["Fisherman",3,"Troop"],["Firecracker",3,"Troop"],["Elixir Golem",3,"Troop"],
+["Little Prince",3,"Troop"],["Goblin Machine",3,"Troop"],
+["Valkyrie",4,"Troop"],["Musketeer",4,"Troop"],["Baby Dragon",4,"Troop"],["Mini P.E.K.K.A",4,"Troop"],["Hog Rider",4,"Troop"],
+["Dark Prince",4,"Troop"],["Lumberjack",4,"Troop"],["Battle Ram",4,"Troop"],["Inferno Dragon",4,"Troop"],["Electro Wizard",4,"Troop"],
+["Hunter",4,"Troop"],["Night Witch",4,"Troop"],["Zappies",4,"Troop"],["Flying Machine",4,"Troop"],["Magic Archer",4,"Troop"],
+["Mighty Miner",4,"Troop"],["Battle Healer",4,"Troop"],["Skeleton King",4,"Troop"],["Golden Knight",4,"Troop"],
+["Skeleton Dragons",4,"Troop"],["Mother Witch",4,"Troop"],["Phoenix",4,"Troop"],["Goblin Demolisher",4,"Troop"],["Rune Giant",4,"Troop"],
+["Giant",5,"Troop"],["Balloon",5,"Troop"],["Witch",5,"Troop"],["Barbarians",5,"Troop"],["Prince",5,"Troop"],["Wizard",5,"Troop"],
+["Minion Horde",5,"Troop"],["Bowler",5,"Troop"],["Executioner",5,"Troop"],["Ram Rider",5,"Troop"],["Rascals",5,"Troop"],["Cannon Cart",5,"Troop"],
+["Royal Hogs",5,"Troop"],["Electro Dragon",5,"Troop"],["Archer Queen",5,"Troop"],["Monk",5,"Troop"],["Goblinstein",5,"Troop"],
+["Giant Skeleton",6,"Troop"],["Royal Giant",6,"Troop"],["Sparky",6,"Troop"],["Elite Barbarians",6,"Troop"],["Goblin Giant",6,"Troop"],
+["Boss Bandit",6,"Troop"],["Spirit Empress",6,"Troop"],["P.E.K.K.A",7,"Troop"],["Lava Hound",7,"Troop"],["Royal Recruits",7,"Troop"],
+["Mega Knight",7,"Troop"],["Electro Giant",7,"Troop"],["Golem",8,"Troop"],["Three Musketeers",9,"Troop"],
+// Buildings
+["Cannon",3,"Building"],["Tombstone",3,"Building"],["Mortar",4,"Building"],["Bomb Tower",4,"Building"],["Tesla",4,"Building"],
+["Furnace",4,"Building"],["Goblin Cage",4,"Building"],["Goblin Drill",4,"Building"],["Goblin Hut",5,"Building"],["Inferno Tower",5,"Building"],
+["Elixir Collector",6,"Building"],["X-Bow",6,"Building"],["Barbarian Hut",7,"Building"],
+// Spells
+["Mirror", null,"Spell"],["Rage",2,"Spell"],["Zap",2,"Spell"],["The Log",2,"Spell"],["Barbarian Barrel",2,"Spell"],["Giant Snowball",2,"Spell"],
+["Goblin Curse",2,"Spell"],["Arrows",3,"Spell"],["Goblin Barrel",3,"Spell"],["Tornado",3,"Spell"],["Clone",3,"Spell"],["Earthquake",3,"Spell"],
+["Royal Delivery",3,"Spell"],["Void",3,"Spell"],["Vines",3,"Spell"],["Fireball",4,"Spell"],["Freeze",4,"Spell"],["Poison",4,"Spell"],
+["Graveyard",5,"Spell"],["Rocket",6,"Spell"],["Lightning",6,"Spell"]
+];
+
+/* alternate images for specific cards */
+const altImages = {
+  "suspicious bush":"https://www.noff.gg/clash-royale/res/img/cards/suspicious_bush.webp",
+  "berserker":"https://www.noff.gg/clash-royale/res/img/cards/berserker.webp",
+  "goblin machine":"https://www.noff.gg/clash-royale/res/img/cards/goblin_machine.webp",
+  "goblin demolisher":"https://www.noff.gg/clash-royale/res/img/cards/goblin_demolisher.webp",
+  "rune giant":"https://www.noff.gg/clash-royale/res/img/cards/rune_giant.webp",
+  "goblinstein":"https://www.noff.gg/clash-royale/res/img/cards/goblinstein.webp",
+  "boss bandit":"https://www.noff.gg/clash-royale/res/img/cards/boss_bandit.webp",
+  "spirit empress":"https://www.noff.gg/clash-royale/res/img/cards/spirit_empress.webp",
+  "goblin curse":"https://www.noff.gg/clash-royale/res/img/cards/goblin_curse.webp",
+  "void":"https://www.noff.gg/clash-royale/res/img/cards/void.webp",
+  "vines":"https://www.noff.gg/clash-royale/res/img/cards/vines.webp"
+};
+
+/* slug exceptions mapping */
+const slugExceptions = {
+  "mini p.e.k.k.a":"mini-pekka",
+  "p.e.k.k.a":"pekka",
+  "three musketeers":"three-musketeers",
+  "skeleton army":"skeleton-army",
+  "ice spirit":"ice-spirit",
+  "fire spirit":"fire-spirit",
+  "electro spirit":"electro-spirit",
+  "heal spirit":"heal-spirit",
+  "spear goblins":"spear-goblins",
+  "ice golem":"ice-golem",
+  "wall breakers":"wall-breakers",
+  "suspicious bush":"suspicious_bush",
+  "skeleton barrel":"skeleton-barrel",
+  "dart goblin":"dart-goblin",
+  "goblin gang":"goblin-gang",
+  "royal ghost":"royal-ghost",
+  "elixir golem":"elixir-golem",
+  "little prince":"little-prince",
+  "goblin machine":"goblin_machine",
+  "inferno dragon":"inferno-dragon",
+  "electro wizard":"electro-wizard",
+  "mega minion":"mega-minion",
+  "mega knight":"mega-knight",
+  "royal hogs":"royal-hogs",
+  "archer queen":"archer-queen",
+  "giant skeleton":"giant-skeleton",
+  "royal recruits":"royal-recruits",
+  "ram rider":"ram-rider",
+  "elixir collector":"elixir-collector",
+  "x-bow":"x-bow",
+  "the log":"the-log",
+  "barbarian barrel":"barbarian-barrel",
+  "giant snowball":"giant-snowball",
+  "goblin barrel":"goblin-barrel",
+  "royal delivery":"royal-delivery",
+  "goblin hut":"goblin-hut",
+  "cannon cart":"cannon-cart",
+  "skeletons":"skeletons",
+  "goblin demolisher":"goblin_demolisher",
+  "rune giant":"rune_giant",
+  "goblinstein":"goblinstein",
+  "boss bandit":"boss_bandit",
+  "spirit empress":"spirit_empress",
+  "goblin curse":"goblin_curse",
+  "void":"void",
+  "vines":"vines",
+  "suspicous bush":"suspicious_bush"
+};
+
+/* slug helper */
+function slugify(name){
+  const key = name.toLowerCase().trim();
+  if(slugExceptions[key]) return slugExceptions[key];
+  return key.replace(/[’'`]/g,'').replace(/[^a-z0-9\s\-\.]/g,'').replace(/\s+/g,'-');
+}
+
+/* build cards with image */
+const cards = rawCards.map(([name, elixir, category])=>{
+  const slug = slugify(name);
+  const low = name.toLowerCase().trim();
+  let image = altImages[low] || `https://royaleapi.github.io/cr-api-assets/cards-150/${slug}.png`;
+  return { name, elixir, category, image, slug };
+});
+
+/* ------------------------------
+  App state
+--------------------------------*/
+const RECENT_KEEP = 3;
+let recent = [];
+let currentCard = null;
+let attemptsForCurrent = 0;
+let score = 0;
+let totalAttempts = 0;
+let streak = 0;
+let maxStreak = Number(localStorage.getItem('cr_max_streak')||0);
+let gamesPlayed = Number(localStorage.getItem('cr_games')||0);
+let guesses = 0;
+let correctGuesses = 0;
+let sumError = 0;
+let highScore = Number(localStorage.getItem('cr_high')||0);
+let timedMode = false;
+let timerInterval = null;
+let timeLeft = 0;
+
+/* user-chosen pool (if empty -> all) */
+let userSelectedPool = new Set(); // contains slugs
+let poolRespectFilters = true;
+
+/* ------------------------------
+  DOM refs
+--------------------------------*/
+const $ = id => document.getElementById(id);
+
+const cardImage = $('cardImage'), cardPreview = $('cardPreview'), displayName = $('displayName'), displayElixir = $('displayElixir');
+const guessInput = $('guessInput'), submitBtn = $('submitBtn'), hintBtn = $('hintBtn'), feedbackEl = $('feedback'), hintText = $('hintText'), triesText = $('triesText');
+const scoreBubble = $('scoreBubble'), totalAttemptsEl = $('totalAttempts'), streakEl = $('streak'), highScoreEl = $('highScore'), recentNames = $('recentNames');
+
+const difficultySelect = $('difficulty');
+const filterCheckboxes = Array.from(document.querySelectorAll('.filter'));
+const timedToggle = $('timedToggle'), timedLength = $('timedLength'), timerEl = $('timer');
+
+const tabQuiz = $('tabQuiz'), tabElixir = $('tabElixir'), tabLibrary = $('tabLibrary');
+const quizPanel = $('quizPanel'), elixirPanel = $('elixirPanel'), libraryGrid = $('libraryGrid'), libPanelSmall = $('libraryPanelSmall');
+
+const generateHandBtn = $('generateHand'), submitHandBtn = $('submitHand'), handInput = $('handInput');
+const handArea = $('handArea'), handFeedback = $('handFeedback'), revealHandBtn = $('revealHand');
+
+const themeToggle = $('themeToggle'), resetHigh = $('resetHigh');
+const statAccuracy = $('statAccuracy'), statAvgError = $('statAvgError'), statMaxStreak = $('statMaxStreak'), statGames = $('statGames');
+
+const librarySearch = $('librarySearch');
+
+// Pool modal refs
+const poolModalBackdrop = $('poolModalBackdrop'), poolGrid = $('poolGrid'), poolSearch = $('poolSearch');
+const selectAllPool = $('selectAllPool'), clearAllPool = $('clearAllPool'), closePool = $('closePool'), poolRespectFiltersCheckbox = $('poolRespectFilters');
+
+/* ------------------------------
+  Init & attach events
+--------------------------------*/
+function init(){
+  attachEvents();
+  loadPreferences();
+  renderLibrary();
+  renderPoolGrid();
+  pickNextCard();
+  updateUI();
+}
+function attachEvents(){
+  submitBtn.addEventListener('click', onSubmit);
+  guessInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') onSubmit(); });
+  hintBtn.addEventListener('click', onHint);
+
+  tabQuiz.addEventListener('click', ()=>showTab('quiz'));
+  tabElixir.addEventListener('click', ()=>showTab('elixir'));
+  tabLibrary.addEventListener('click', openPoolModal); // repurpose top button to open Quiz Pool
+
+  difficultySelect.addEventListener('change', ()=>{ generateEasyChoices(); updateNameVisibility(); });
+  filterCheckboxes.forEach(cb=>cb.addEventListener('change', ()=>{ renderLibrary(); pickNextCard(); }));
+
+  generateHandBtn.addEventListener('click', generateHand);
+  submitHandBtn.addEventListener('click', submitHand);
+  revealHandBtn.addEventListener('click', revealHand);
+
+  librarySearch.addEventListener('input', renderLibrary);
+  poolSearch.addEventListener('input', renderPoolGrid);
+  selectAllPool.addEventListener('click', ()=>{ cards.forEach(c=>userSelectedPool.add(c.slug)); renderPoolGrid();});
+  clearAllPool.addEventListener('click', ()=>{ userSelectedPool.clear(); renderPoolGrid();});
+  closePool.addEventListener('click', ()=>{ applyPoolModal(); closePoolModal(); });
+
+  poolRespectFiltersCheckbox.addEventListener('change', ()=>{ poolRespectFilters = poolRespectFiltersCheckbox.checked; });
+
+  timedToggle.addEventListener('change', onTimedToggle);
+  timedLength.addEventListener('change', ()=>{ timerEl.textContent = timedLength.value; });
+
+  themeToggle.addEventListener('click', toggleTheme);
+  resetHigh.addEventListener('click', ()=>{ localStorage.removeItem('cr_high'); highScore=0; highScoreEl.textContent='0'; alert('High score reset');});
+}
+
+/* ------------------------------
+  Pool modal
+--------------------------------*/
+function openPoolModal(){
+  poolModalBackdrop.style.display = 'flex';
+  poolSearch.value = '';
+  renderPoolGrid();
+}
+function closePoolModal(){ poolModalBackdrop.style.display = 'none'; }
+function applyPoolModal(){
+  // if userSelectedPool empty -> means all
+  renderLibrary();
+  pickNextCard();
+}
+function renderPoolGrid(){
+  poolGrid.innerHTML = '';
+  const q = poolSearch.value.trim().toLowerCase();
+  for(const c of cards){
+    if(q && !c.name.toLowerCase().includes(q)) continue;
+    const d = document.createElement('div');
+    d.className = 'pool-card';
+    const checked = userSelectedPool.has(c.slug) ? 'checked' : '';
+    d.innerHTML = `<label style="display:flex;gap:8px;align-items:center;width:100%"><input type="checkbox" data-slug="${c.slug}" ${checked}><img src="${c.image}" style="width:38px;height:38px;object-fit:contain"><div style="flex:1"><div style="font-weight:700">${c.name}</div><div class="muted">${c.elixir===null? '? Elixir' : c.elixir + ' Elixir'}</div></div></label>`;
+    d.querySelector('input').addEventListener('change',(e)=>{
+      if(e.target.checked) userSelectedPool.add(c.slug); else userSelectedPool.delete(c.slug);
+    });
+    poolGrid.appendChild(d);
+  }
+}
+
+/* ------------------------------
+  Filters / pool intersection
+--------------------------------*/
+function getFilteredPool(){
+  const activeCats = filterCheckboxes.filter(cb=>cb.checked).map(cb=>cb.value);
+  let pool = cards.filter(c => activeCats.includes(c.category));
+  // If user selected pool has items and respects filters is toggled, intersect
+  if(userSelectedPool.size>0){
+    pool = pool.filter(c => userSelectedPool.has(c.slug));
+  }
+  return pool;
+}
+
+/* ------------------------------
+  Avoid repeats
+--------------------------------*/
+function pickRandomAvoidRecent(pool){
+  if(!pool || pool.length===0) return null;
+  let tries = 0;
+  while(true){
+    const c = pool[Math.floor(Math.random()*pool.length)];
+    if(!recent.includes(c.slug)) return c;
+    tries++;
+    if(tries>60) return c;
+  }
+}
+
+/* ------------------------------
+  Show / preview a specific card (from library)
+--------------------------------*/
+function previewCard(card){
+  currentCard = card;
+  attemptsForCurrent = 0;
+  hintText.textContent = '';
+  feedbackEl.textContent = '';
+  guessInput.value = '';
+  // DO NOT reveal elixir here (quiz mode must hide it) — show question only
+  cardImage.src = card.image;
+  cardImage.onerror = ()=>{ cardImage.onerror=null; cardImage.src = blankSVG('no image'); };
+  updateNameVisibility();
+  displayElixir.innerHTML = `<span style="opacity:0.6">?</span>`;
+  generateEasyChoices();
+  showTab('quiz');
+}
+
+/* ------------------------------
+  Pick next quiz card
+--------------------------------*/
+function pickNextCard(){
+  const pool = getFilteredPool();
+  const c = pickRandomAvoidRecent(pool);
+  if(!c){
+    currentCard = null;
+    displayName.textContent = 'No cards (check filters/pool)';
+    cardImage.src = blankSVG('No image');
+    return;
+  }
+  currentCard = c;
+  attemptsForCurrent = 0;
+  hintText.textContent = '';
+  feedbackEl.textContent = '';
+  guessInput.value = '';
+  // push to recent
+  recent.unshift(c.slug);
+  if(recent.length>RECENT_KEEP) recent = recent.slice(0,RECENT_KEEP);
+  recentNames.textContent = recent.map(s=>{
+    const found = cards.find(x=>x.slug===s); return found? found.name : s;
+  }).join(', ');
+  // render preview
+  cardImage.src = c.image;
+  cardImage.onerror = ()=>{ cardImage.onerror=null; cardImage.src = blankSVG('no image'); };
+  updateNameVisibility();
+  // keep elixir hidden in quiz (only show a questionmark)
+  displayElixir.innerHTML = `<span style="opacity:0.6">?</span>`;
+  generateEasyChoices();
+}
+
+/* reveal elixir visually (icon + number) */
+function revealElixirForCurrent(){
+  if(!currentCard) return;
+  if(currentCard.elixir === null){
+    displayElixir.innerHTML = `<span style="opacity:0.6">?</span>`;
+  } else {
+    displayElixir.innerHTML = `<img src="${elixirIcon(currentCard.elixir)}" alt="elixir"> <span style="font-weight:800">${currentCard.elixir}</span>`;
+  }
+}
+
+/* update whether name shown (hard hides) */
+function updateNameVisibility(){
+  if(!currentCard) { displayName.textContent = '—'; return; }
+  displayName.textContent = (difficultySelect.value === 'hard') ? '—' : currentCard.name;
+}
+
+/* ------------------------------
+  Easy mode choices
+--------------------------------*/
+function generateEasyChoices(){
+  const easyArea = $('easyChoices');
+  easyArea.innerHTML = '';
+  if(!currentCard || difficultySelect.value !== 'easy') { easyArea.style.display = 'none'; $('inputRow').style.display='flex'; return; }
+  easyArea.style.display = 'flex';
+  $('inputRow').style.display='none';
+
+  // generate 4 choices: correct + 3 distractors (within 1-9)
+  const correct = currentCard.elixir === null ? null : currentCard.elixir;
+  let options = [];
+  if(correct === null){
+    // Mirror: pick 4 random 1-6
+    while(options.length < 4){
+      const n = Math.floor(Math.random()*6)+1;
+      if(!options.includes(n)) options.push(n);
+    }
+  } else {
+    const set = new Set([correct]);
+    // prefer distractors that exist in current pool's elixir set for relevance
+    const pool = getFilteredPool();
+    const elixirPool = Array.from(new Set(pool.filter(p=>p.elixir!==null).map(p=>p.elixir)));
+    while(set.size < 4){
+      let pick;
+      if(elixirPool.length >= 3) pick = elixirPool[Math.floor(Math.random()*elixirPool.length)];
+      else pick = Math.floor(Math.random()*9)+1;
+      set.add(pick);
+    }
+    options = Array.from(set);
+  }
+  // shuffle
+  options = options.sort(()=>Math.random()-0.5);
+  // create buttons
+  options.forEach(opt=>{
+    const b = document.createElement('button');
+    b.className = 'ghost small';
+    b.textContent = String(opt);
+    b.onclick = ()=>{
+      guessInput.value = opt;
+      onSubmit();
+    };
+    easyArea.appendChild(b);
+  });
+}
+
+/* ------------------------------
+  Submit / scoring logic
+--------------------------------*/
+function onSubmit(){
+  if(!currentCard) return;
+  // Mirror/null-elixir handling
+  if(currentCard.elixir === null){
+    feedbackEl.textContent = 'Mirror (variable elixir). Skipping this card.';
+    totalAttempts++;
+    updateScoreAndStats(false,0,true);
+    setTimeout(()=>{ pickNextCard(); updateUI(); }, 700);
+    return;
+  }
+  let raw = (guessInput.value+'').trim();
+  if(difficultySelect.value === 'easy' && raw===''){
+    feedbackEl.textContent = 'Choose an option';
+    return;
+  }
+  if(raw===''){ feedbackEl.textContent = 'Enter a number (1-9)'; return; }
+  const guess = Number(raw);
+  if(Number.isNaN(guess)){ feedbackEl.textContent = 'Enter a number'; return; }
+
+  attemptsForCurrent++;
+  guesses++;
+  const err = Math.abs(guess - currentCard.elixir);
+  sumError += err;
+
+  if(guess === currentCard.elixir){
+    // correct
+    correctGuesses++;
+    if(attemptsForCurrent===1){
+      score += 1;
+      feedbackEl.textContent = `✅ Correct! +1`;
+      animatePreview('correct');
+    } else {
+      score += 0.5;
+      feedbackEl.textContent = `✅ Correct on 2nd try +0.5`;
+      animatePreview('correct');
+    }
+    // reveal elixir when correct
+    revealElixirForCurrent();
+    totalAttempts++;
+    streak++;
+    if(streak>maxStreak){ maxStreak = streak; localStorage.setItem('cr_max_streak', String(maxStreak)); }
+    updateScoreAndStats(true,err,false);
+    setTimeout(()=>{ pickNextCard(); updateUI(); }, 900);
+  } else {
+    // wrong
+    if(attemptsForCurrent===1){
+      feedbackEl.textContent = `❌ Wrong — try once more.`;
+      animatePreview('wrong');
+      updateUI();
+    } else {
+      // second wrong -> reveal correct elixir
+      feedbackEl.textContent = `❌ Wrong again — revealing answer.`;
+      animatePreview('wrong');
+      revealElixirForCurrent();
+      totalAttempts++;
+      streak = 0;
+      updateScoreAndStats(false,err,false);
+      setTimeout(()=>{ pickNextCard(); updateUI(); }, 1200);
+    }
+  }
+}
+
+/* ------------------------------
+  Hints & animation
+--------------------------------*/
+function onHint(){
+  if(!currentCard || currentCard.elixir === null){ hintText.textContent = 'No hint available.'; return; }
+  // range hint: ±1 but bounded
+  const low = Math.max(1, currentCard.elixir - 1);
+  const high = Math.min(9, currentCard.elixir + 1);
+  hintText.textContent = `Hint: between ${low} and ${high} elixir.`;
+}
+
+function animatePreview(kind){
+  cardPreview.classList.remove('correct','wrong');
+  void cardPreview.offsetWidth;
+  if(kind==='correct') cardPreview.classList.add('correct');
+  if(kind==='wrong') cardPreview.classList.add('wrong');
+  setTimeout(()=>{ cardPreview.classList.remove('correct','wrong'); }, 700);
+}
+
+/* ------------------------------
+  Score & Stats
+--------------------------------*/
+function updateScoreAndStats(wasCorrect, error, skipped){
+  // persist high score only
+  if(score > highScore){ highScore = score; localStorage.setItem('cr_high', String(highScore)); }
+  // persist some metrics to localStorage (guesses, sumError, correct)
+  localStorage.setItem('cr_sumErr', String(sumError));
+  localStorage.setItem('cr_guesses', String(guesses));
+  localStorage.setItem('cr_correct', String(correctGuesses));
+  localStorage.setItem('cr_high', String(highScore));
+  updateUI();
+}
+
+function updateUI(){
+  scoreBubble.textContent = `Score: ${score}`;
+  totalAttemptsEl.textContent = totalAttempts;
+  streakEl.textContent = streak;
+  highScoreEl.textContent = highScore;
+  recentNames.textContent = recent.map(s=>{ const f = cards.find(x=>x.slug===s); return f? f.name : s; }).join(', ') || '—';
+  statAccuracy.textContent = guesses>0 ? Math.round((correctGuesses/guesses)*100) + '%' : '0%';
+  statAvgError.textContent = guesses>0 ? (sumError/guesses).toFixed(2) : '0';
+  statMaxStreak.textContent = maxStreak;
+  statGames.textContent = gamesPlayed;
+}
+
+/* ------------------------------
+  Timed Mode
+--------------------------------*/
+function onTimedToggle(){
+  timedMode = timedToggle.checked;
+  if(timedMode){
+    timeLeft = Number(timedLength.value);
+    timerEl.style.display = '';
+    timerEl.textContent = timeLeft;
+    startTimer();
+  } else {
+    stopTimer();
+    timerEl.style.display = 'none';
+  }
+}
+function startTimer(){
+  stopTimer();
+  timeLeft = Number(timedLength.value);
+  timerEl.textContent = timeLeft;
+  timerInterval = setInterval(()=>{
+    timeLeft--;
+    timerEl.textContent = timeLeft;
+    if(timeLeft<=0){
+      stopTimer();
+      endTimedSession();
+    }
+  },1000);
+}
+function stopTimer(){
+  if(timerInterval){ clearInterval(timerInterval); timerInterval = null; }
+}
+function endTimedSession(){
+  alert(`Time's up!\nScore: ${score}\nAttempts: ${totalAttempts}\nAccuracy: ${guesses>0?Math.round((correctGuesses/guesses)*100):0}%`);
+  if(score>highScore){ highScore = score; localStorage.setItem('cr_high', String(highScore)); }
+  // reset for next
+  score = 0; totalAttempts = 0; guesses = 0; correctGuesses = 0; sumError = 0; streak = 0;
+  gamesPlayed++;
+  localStorage.setItem('cr_games', String(gamesPlayed));
+  updateUI();
+  pickNextCard();
+}
+
+/* ------------------------------
+  Elixir icon helper & placeholder
+--------------------------------*/
+function elixirIcon(n){ const val = Number.isFinite(n)? Math.max(0,Math.min(9,n)) : 1; return `https://www.noff.gg/clash-royale/res/img/elixir/${val}.webp`; }
+function blankSVG(text){ const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='160' height='120'><rect width='100%' height='100%' fill='%23ddd'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23666' font-size='12'>${text}</text></svg>`; return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); }
+
+/* ------------------------------
+  Library rendering & search
+--------------------------------*/
+function renderLibrary(){
+  libraryGrid.innerHTML = '';
+  const q = (librarySearch.value || '').trim().toLowerCase();
+  const pool = getFilteredPool().sort((a,b)=>a.name.localeCompare(b.name));
+  for(const c of pool){
+    if(q && !c.name.toLowerCase().includes(q)) continue;
+    const div = document.createElement('div');
+    div.className = 'lib-card';
+    div.innerHTML = `
+      <div style="height:90px;display:flex;align-items:center;justify-content:center">
+        <img src="${c.image}" alt="${c.name}">
+      </div>
+      <div class="lib-name">${c.name}</div>
+      <div class="elixir-row">${c.elixir===null? '<img src="'+elixirIcon(1)+'"><span>?</span>':'<img src="'+elixirIcon(c.elixir)+'"><span>'+c.elixir+'</span>'}</div>
+    `;
+    // click => preview in quiz (but DO NOT reveal cost)
+    div.addEventListener('click', ()=> previewCard(c));
+    libraryGrid.appendChild(div);
+  }
+}
+
+/* ------------------------------
+  Elixir Meter practice
+--------------------------------*/
+let currentHand = [];
+function generateHand(){
+  const pool = getFilteredPool();
+  if(pool.length < 4){ handFeedback.textContent = 'Not enough cards for a hand (check filters/pool)'; return; }
+  handArea.innerHTML = '';
+  currentHand = [];
+  for(let i=0;i<4;i++){
+    const c = pool[Math.floor(Math.random()*pool.length)];
+    currentHand.push(c);
+    const div = document.createElement('div');
+    div.className = 'card-mini';
+    div.innerHTML = `<img src="${c.image}" alt="${c.name}" onerror="this.onerror=null;this.src='${blankSVG('no image')}';">`;
+    handArea.appendChild(div);
+  }
+  const total = currentHand.reduce((s,c)=> s + (c.elixir===null?0:c.elixir),0);
+  handArea.dataset.total = total;
+  handFeedback.textContent = 'Guess total elixir of these 4 cards.';
+  handInput.value = '';
+}
+function submitHand(){
+  if(currentHand.length===0){ handFeedback.textContent = 'Generate a hand first.'; return; }
+  const raw = handInput.value.trim();
+  if(raw===''){ handFeedback.textContent = 'Enter a number'; return; }
+  const guess = Number(raw);
+  if(Number.isNaN(guess)){ handFeedback.textContent = 'Enter a valid number'; return; }
+  const totalTrue = Number(handArea.dataset.total);
+  const err = Math.abs(guess - totalTrue);
+  if(guess === totalTrue) handFeedback.textContent = `✅ Perfect! Total = ${totalTrue}.`;
+  else handFeedback.textContent = `❌ Your guess ${guess}. Actual ${totalTrue}. Error ${err}.`;
+}
+function revealHand(){ if(currentHand.length===0) return; const totalTrue = Number(handArea.dataset.total); handFeedback.textContent = `Cards total elixir: ${totalTrue}`; }
+
+/* ------------------------------
+  Tabs / theme / preferences
+--------------------------------*/
+function showTab(which){
+  tabQuiz.classList.remove('active'); tabElixir.classList.remove('active'); tabLibrary.classList.remove('active');
+  quizPanel.style.display = 'none'; elixirPanel.style.display = 'none';
+  libPanelSmall.style.display = 'none';
+  if(which === 'quiz'){ tabQuiz.classList.add('active'); quizPanel.style.display = ''; }
+  else if(which === 'elixir'){ tabElixir.classList.add('active'); elixirPanel.style.display = ''; }
+  else { tabLibrary.classList.add('active'); libPanelSmall.style.display = 'block'; }
+}
+function toggleTheme(){
+  if(document.documentElement.classList.contains('dark')){
+    document.documentElement.classList.remove('dark'); themeToggle.textContent='🌙 Theme'; localStorage.theme='light';
+  } else {
+    document.documentElement.classList.add('dark'); themeToggle.textContent='☀️ Theme'; localStorage.theme='dark';
+  }
+}
+function loadPreferences(){
+  const t = localStorage.theme || 'dark';
+  if(t==='dark'){ document.documentElement.classList.add('dark'); themeToggle.textContent='☀️ Theme'; }
+  else{ document.documentElement.classList.remove('dark'); themeToggle.textContent='🌙 Theme'; }
+  highScore = Number(localStorage.getItem('cr_high')||0);
+  highScoreEl.textContent = highScore;
+  gamesPlayed = Number(localStorage.getItem('cr_games')||0);
+  statGames.textContent = gamesPlayed;
+  maxStreak = Number(localStorage.getItem('cr_max_streak')||0);
+  statMaxStreak.textContent = maxStreak;
+}
+
+/* ------------------------------
+  Initialization & accessibility
+--------------------------------*/
+init();
+updateUI();
+
+/* keyboard shortcuts */
+document.addEventListener('keydown',(e)=>{
+  if(e.key==='1') difficultySelect.value='easy';
+  if(e.key==='2') difficultySelect.value='medium';
+  if(e.key==='3') difficultySelect.value='hard';
+  if(e.key==='t'){ timedToggle.checked = !timedToggle.checked; onTimedToggle(); }
+});
+
+/* close pool modal if clicking backdrop (but not the modal itself) */
+poolModalBackdrop.addEventListener('click', (ev)=>{
+  if(ev.target === poolModalBackdrop) { applyPoolModal(); closePoolModal(); }
+});
+</script>
+</body>
+</html>
